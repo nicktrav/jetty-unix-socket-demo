@@ -1,0 +1,35 @@
+# ------------------
+# Build container
+# ------------------
+
+FROM openjdk:11 as build
+
+RUN cd /tmp && \
+  curl -L -o maven.tar.gz https://archive.apache.org/dist/maven/maven-3/3.6.0/binaries/apache-maven-3.6.0-bin.tar.gz && \
+  mkdir /maven && \
+  tar xzf maven.tar.gz -C /maven --strip 1
+
+ENV PATH $PATH:/maven/bin
+
+ADD . /build
+
+WORKDIR /build
+
+RUN mvn clean package
+
+# ------------------
+# Runtime container
+# ------------------
+
+FROM centos:7
+
+# Java
+RUN curl -sL https://github.com/shyiko/jabba/raw/master/install.sh \
+  | JABBA_COMMAND="install openjdk@1.11.0-1 -o /jdk" bash
+
+ENV JAVA_HOME /jdk
+ENV PATH $JAVA_HOME/bin:$PATH
+
+COPY --from=build /build/target/server.jar .
+
+ENTRYPOINT ["java", "-jar", "server.jar"]

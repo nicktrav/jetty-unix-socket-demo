@@ -1,0 +1,11 @@
+FROM golang:1.11.2-alpine
+
+RUN apk update && apk upgrade && apk add --no-cache git
+
+RUN go get -u github.com/tsenart/vegeta
+
+ADD load.target .
+
+ADD loadtest.sh .
+
+ENTRYPOINT ["sh", "loadtest.sh"]

@@ -1,0 +1,5 @@
+FROM envoyproxy/envoy
+
+ADD config.yaml etc/envoy/envoy.yaml
+
+EXPOSE 10000
